@@ -136,12 +136,54 @@ class Board:
         return moves
 
 
+    def is_king_not_checked(self,piece, row, col):
+
+        offsets = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+
+        for move in self.get_knight_moves(Knight(piece.color,[row,col],""), row, col):
+            possible_target = self.board[move[0]][move[1]]
+            if isinstance(possible_target, Knight):
+                return False
+
+        for move in self.get_bishop_moves(Bishop(piece.color,[row,col],""), row, col):
+            possible_target = self.board[move[0]][move[1]]
+            if isinstance(possible_target, Bishop):
+                return False
+
+        for move in self.get_rook_moves(Rook(piece.color,[row,col],"",""), row, col):
+            possible_target = self.board[move[0]][move[1]]
+            if isinstance(possible_target, Rook):
+                return False
+
+        for move in self.get_queen_moves(Queen(piece.color,[row,col],""), row, col):
+            possible_target = self.board[move[0]][move[1]]
+            if isinstance(possible_target, Queen):
+                return False
+
+
+        for c, r in offsets:
+            nr, nc = col + c, row + r
+            if 0 <= nr <= 7 and 0 <= nc <= 7:
+                cell_piece = self.board[nr][nc]
+                if isinstance(cell_piece, King):
+                    return False
+
+        return True
+
+
     def get_king_moves(self,piece, row, col):
         moves = []
         offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]
         for c, r in offsets:
             nr,nc = col + c, row + r
             if 0 <= nr <= 7 and 0 <= nc <= 7:
+                cell_piece = self.board[nr][nc]
+                if cell_piece.color != piece.color and self.is_king_not_checked(piece, nr, nc):
+                    moves.append([nr,nc])
+
+
+    def get_queen_moves(self, piece, row, col):
+        return self.get_bishop_moves(piece,row,col) + self.get_rook_moves(piece,row,col)
 
 
 
@@ -155,7 +197,7 @@ class Board:
 
         match piece:
              case piece if isinstance(piece, Pawn) and piece.color == "w":
-                 moves = self.get_w_pawn_moves(piece,row,col)
+                 moves = self.get_w_pawn_moves(piece, row, col)
 
              case piece if isinstance(piece, Pawn) and piece.color == "b":
                  moves = self.get_b_pawn_moves(piece, row, col)
@@ -164,13 +206,13 @@ class Board:
                  moves = self.get_knight_moves(piece, row, col)
 
              case piece if isinstance(piece, Bishop):
-                 moves = self.get_bishop_moves(piece,row,col)
+                 moves = self.get_bishop_moves(piece, row, col)
 
              case piece if isinstance(piece, Rook):
-                 moves = self.get_rook_moves(piece,row,col)
+                 moves = self.get_rook_moves(piece, row, col)
 
              case piece if isinstance(piece, Queen):
-                moves = self.get_bishop_moves(piece,row,col) + self.get_rook_moves(piece,row,col)
+                moves = self.get_queen_moves(piece, row, col)
 
 
 
