@@ -43,25 +43,56 @@ def main():
     pygame.display.set_caption("Chess Game")
 
     # Creating obj Board
-    chess_game_board = Board()
-    load_images(chess_game_board)
+    board = Board()
+    load_images(board)
 
     clock = pygame.time.Clock()
+    selected_sq = ()
+    player_clicks = []
+    valid_moves = []
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            # if event.type == pygame.MOUSEBUTTONDOWN:
-            #     mouse_pos = pygame.mouse.get_pos()
-            #     row = mouse_pos[0] // SQ_SIZE
-            #     col =  mouse_pos[1] // SQ_SIZE
-            #     if not (chess_game_board[row,col] == None):
-            #         chess_game_board.get_valid_moves(row,col)
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                col = mouse_pos[0] // SQ_SIZE
+                row = mouse_pos[1] // SQ_SIZE
+
+                if selected_sq == (row, col):
+                    selected_sq = ()
+                    player_clicks = []
+                    valid_moves = []
+                else:
+                    selected_sq = (row, col)
+                    player_clicks.append(selected_sq)
+
+                if len(player_clicks) == 2:
+                    start_sq = player_clicks[0]
+                    end_sq = player_clicks[1]
+
+                    if [end_sq[0], end_sq[1]] in valid_moves:
+                        board.move_piece(start_sq, end_sq)
+                        selected_sq = ()
+                        player_clicks = []
+                        valid_moves = []
+                    else:
+                        player_clicks = [selected_sq]
+
+                if len(player_clicks) == 1:
+                    r, c = player_clicks[0]
+                    if board.board[r][c] is not None:
+                        valid_moves = []
+                        valid_moves = board.get_valid_moves(r, c)
+                    else:
+                        player_clicks = []
+                        selected_sq = ()
 
         # drawing by 1 iteration
-        draw_game_state(screen, chess_game_board)
+        draw_game_state(screen, board)
 
         pygame.display.flip()
         clock.tick(60)

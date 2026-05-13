@@ -4,7 +4,7 @@ class Board:
 
     def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
-        for i in range (0,8):
+        for i in range (0,8):                                                                               #Creating new board with pieces
             self.board[1][i] = Pawn("w", [1,i], "data/Pieces_img/w_Pawn.png")
             self.board[6][i] = Pawn("b", [6, i], "data/Pieces_img/b_Pawn.png")
             match i:
@@ -28,6 +28,11 @@ class Board:
                     self.board[7][i] = King("b", [7, i], "data/Pieces_img/b_King.png",False)
 
 
+    def __getitem__(self, item):
+        return self.board[item]
+
+
+
     def get_rook_moves(self, piece, row, col):
         moves = []
         directions = [(1,0), (-1,0), (0,1), (0,-1)]
@@ -36,7 +41,7 @@ class Board:
             for i in range(1, 8):
                 nr, nc = row + dir * i, col + dir * i
                 if 0 <= nr <= 7 and 0 <= nc <= 7:
-                    cell_piece = self.board[nr][nc]
+                    cell_piece = self.board[nr][nc]                             #Rook moves
                     if cell_piece is None:
                         moves.append([nr, nc])
                     elif cell_piece.color != piece.color:
@@ -60,7 +65,7 @@ class Board:
             for i in range(1, 8):
                 nr, nc = row + dr * i, col + dc * i
                 if 0 <= nr < 8 and 0 <= nc < 8:
-                    cell_piece = self.board[nr][nc]
+                    cell_piece = self.board[nr][nc]                          #Bishop moves
                     if cell_piece is None:
                         moves.append([nr, nc])
                     elif cell_piece.color != piece.color:
@@ -82,12 +87,12 @@ class Board:
                    (-2, 1), (-1, 2), (2, -1),
                    (-1, -2), (-2, -1)]
 
-        for c,r in offsets:
+        for c,r in offsets:                                                  #Knight moves
             if 0 <= row + c <= 7 and 0 <= col + r <= 7:
                 cell_piece = self.board[row + c][col + r]
 
                 if cell_piece is None or cell_piece.color != piece.color:
-                   moves.append(list((c,r)))
+                   moves.append([c,r])
 
         return moves
 
@@ -99,15 +104,15 @@ class Board:
                 moves.append([row + 1, col])
             else:
                 moves.append([row + 1, col])
-                if self.board[row + 2][col] is None:  # w_Pawn moves
+                if self.board[row + 2][col] is None:                     # White Pawn moves
                     moves.append([3, col])
 
-        if col is not 7:
+        if col != 7:
             target_right = self.board[row + 1][col + 1]
             if target_right is not None and target_right.color != piece.color:
                 moves.append([row + 1, col + 1])
 
-        if col is not 0:
+        if col != 0:
             target_left = self.board[row + 1][col - 1]
             if target_left is not None and target_left.color != piece.color:
                 moves.append([row + 1, col - 1])
@@ -121,15 +126,15 @@ class Board:
                 moves.append([row - 1, col])
             else:
                 moves.append([row - 1, col])
-                if self.board[row - 2][col] is None:  # b_Pawn moves
+                if self.board[row - 2][col] is None:                  # Black Pawn moves
                     moves.append([5, col])
 
-        if col is not 7:
+        if col != 7:
             target_right = self.board[row - 1][col + 1]
             if target_right is not None and target_right.color != piece.color:
                 moves.append([row - 1, col + 1])
 
-        if col is not 0:
+        if col != 0:
             target_left = self.board[row - 1][col - 1]
             if target_left is not None and target_left.color != piece.color:
                 moves.append([row - 1, col - 1])
@@ -145,7 +150,7 @@ class Board:
             if isinstance(possible_target, Knight):
                 return False
 
-        for move in self.get_bishop_moves(Bishop(piece.color,[row,col],""), row, col):
+        for move in self.get_bishop_moves(Bishop(piece.color,[row,col],""), row, col):          #Checking is King checked
             possible_target = self.board[move[0]][move[1]]
             if isinstance(possible_target, Bishop):
                 return False
@@ -173,21 +178,21 @@ class Board:
 
     def get_king_moves(self,piece, row, col):
         moves = []
-        offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]
+        offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]                               #King moves
         for c, r in offsets:
             nr,nc = col + c, row + r
             if 0 <= nr <= 7 and 0 <= nc <= 7:
                 cell_piece = self.board[nr][nc]
-                if cell_piece.color != piece.color and self.is_king_not_checked(piece, nr, nc):
+                #checking if King won't be checked on that cell
+                if (cell_piece == None or cell_piece.color != piece.color) and self.is_king_not_checked(piece, nr, nc):
                     moves.append([nr,nc])
+
+        return moves
+
 
 
     def get_queen_moves(self, piece, row, col):
-        return self.get_bishop_moves(piece,row,col) + self.get_rook_moves(piece,row,col)
-
-
-
-
+        return self.get_bishop_moves(piece,row,col) + self.get_rook_moves(piece,row,col)              #Queen moves consists of moves of Bishop and Rook
 
 
 
@@ -203,7 +208,7 @@ class Board:
                  moves = self.get_b_pawn_moves(piece, row, col)
 
              case piece if isinstance(piece, Knight):
-                 moves = self.get_knight_moves(piece, row, col)
+                 moves = self.get_knight_moves(piece, row, col)                     #Method that is called from main for getting valid moves
 
              case piece if isinstance(piece, Bishop):
                  moves = self.get_bishop_moves(piece, row, col)
@@ -213,6 +218,10 @@ class Board:
 
              case piece if isinstance(piece, Queen):
                 moves = self.get_queen_moves(piece, row, col)
+
+        return moves
+
+
 
 
 
