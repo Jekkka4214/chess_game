@@ -3,6 +3,8 @@ import sys
 from src.Board import Board
 import os
 
+
+
 # constance for working with pixels
 base_path = os.path.dirname(os.path.dirname(__file__))
 WIDTH, HEIGHT = 600, 600
@@ -51,6 +53,7 @@ def main():
     player_clicks = []
     valid_moves = []
     white_to_move = True
+    board[0][0] = None
 
     while True:
         for event in pygame.event.get():
@@ -88,6 +91,7 @@ def main():
                         selected_sq = ()
                         player_clicks = []
                         valid_moves = []
+
                     else:
                         piece = board.board[row][col]
                         if piece is not None and (
