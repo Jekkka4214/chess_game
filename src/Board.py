@@ -21,11 +21,11 @@ class Board:
                     self.board[7][i] = Bishop("b", [7, i], "data/Pieces_img/b_Bishop.png")
 
                 case 3:
-                    self.board[0][i] = Queen("w", [0, i], "data/Pieces_img/w_Queen.png")
-                    self.board[7][i] = Queen("b", [7, i], "data/Pieces_img/b_Queen.png")
-                case 4:
                     self.board[0][i] = King("w", [0, i], "data/Pieces_img/w_King.png",False)
                     self.board[7][i] = King("b", [7, i], "data/Pieces_img/b_King.png",False)
+                case 4:
+                    self.board[0][i] = Queen("w", [0, i], "data/Pieces_img/w_Queen.png")
+                    self.board[7][i] = Queen("b", [7, i], "data/Pieces_img/b_Queen.png")
 
 
     def __getitem__(self, item):

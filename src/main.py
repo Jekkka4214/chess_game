@@ -50,6 +50,7 @@ def main():
     selected_sq = ()
     player_clicks = []
     valid_moves = []
+    white_to_move = True
 
     while True:
         for event in pygame.event.get():
@@ -67,8 +68,15 @@ def main():
                     player_clicks = []
                     valid_moves = []
                 else:
-                    selected_sq = (row, col)
-                    player_clicks.append(selected_sq)
+                    if len(player_clicks) == 0:
+                        piece = board.board[row][col]
+                        if piece is not None:
+                            if (white_to_move and piece.color == "w") or (not white_to_move and piece.color == "b"):
+                                selected_sq = (row, col)
+                                player_clicks.append(selected_sq)
+                    else:
+                        selected_sq = (row, col)
+                        player_clicks.append(selected_sq)
 
                 if len(player_clicks) == 2:
                     start_sq = player_clicks[0]
@@ -76,20 +84,24 @@ def main():
 
                     if [end_sq[0], end_sq[1]] in valid_moves:
                         board.move_piece(start_sq, end_sq)
+                        white_to_move = not white_to_move
                         selected_sq = ()
                         player_clicks = []
                         valid_moves = []
                     else:
-                        player_clicks = [selected_sq]
+                        piece = board.board[row][col]
+                        if piece is not None and (
+                                (white_to_move and piece.color == "w") or (not white_to_move and piece.color == "b")):
+                            selected_sq = (row, col)
+                            player_clicks = [selected_sq]
+                        else:
+                            selected_sq = ()
+                            player_clicks = []
+                        valid_moves = []
 
                 if len(player_clicks) == 1:
                     r, c = player_clicks[0]
-                    if board.board[r][c] is not None:
-                        valid_moves = []
-                        valid_moves = board.get_valid_moves(r, c)
-                    else:
-                        player_clicks = []
-                        selected_sq = ()
+                    valid_moves = board.get_valid_moves(r, c)
 
         # drawing by 1 iteration
         draw_game_state(screen, board)
