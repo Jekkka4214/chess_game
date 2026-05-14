@@ -37,9 +37,9 @@ class Board:
         moves = []
         directions = [(1,0), (-1,0), (0,1), (0,-1)]
 
-        for dir in directions:
+        for dr,dc in directions:
             for i in range(1, 8):
-                nr, nc = row + dir * i, col + dir * i
+                nr, nc = row + dr * i, col + dc * i
                 if 0 <= nr <= 7 and 0 <= nc <= 7:
                     cell_piece = self.board[nr][nc]                             #Rook moves
                     if cell_piece is None:
@@ -87,12 +87,13 @@ class Board:
                    (-2, 1), (-1, 2), (2, -1),
                    (-1, -2), (-2, -1)]
 
-        for c,r in offsets:                                                  #Knight moves
-            if 0 <= row + c <= 7 and 0 <= col + r <= 7:
-                cell_piece = self.board[row + c][col + r]
+        for r,c in offsets:
+            nr,nc = row + r, col + c                                                                            #Knight moves
+            if 0 <= nr <= 7 and 0 <= nc <= 7:
+                cell_piece = self.board[nr][nc]
 
                 if cell_piece is None or cell_piece.color != piece.color:
-                   moves.append([c,r])
+                   moves.append([nr,nc])
 
         return moves
 
@@ -106,7 +107,10 @@ class Board:
                 moves.append([row + 1, col])
                 if self.board[row + 2][col] is None:                     # White Pawn moves
                     moves.append([3, col])
+        return moves + self.get_w_pawn_take_moves(piece, row, col)
 
+    def get_w_pawn_take_moves(self, piece, row, col):
+        moves = []
         if col != 7:
             target_right = self.board[row + 1][col + 1]
             if target_right is not None and target_right.color != piece.color:
@@ -127,8 +131,12 @@ class Board:
             else:
                 moves.append([row - 1, col])
                 if self.board[row - 2][col] is None:                  # Black Pawn moves
-                    moves.append([5, col])
+                    moves.append([4, col])
+        return moves + self.get_b_pawn_take_moves(piece, row, col)
 
+
+    def get_b_pawn_take_moves(self,piece, row, col):
+        moves = []
         if col != 7:
             target_right = self.board[row - 1][col + 1]
             if target_right is not None and target_right.color != piece.color:
@@ -141,36 +149,46 @@ class Board:
         return moves
 
 
+
     def is_king_not_checked(self,piece, row, col):
 
+        enemy_color = "b" if piece.color == "w" else "w"
         offsets = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
         for move in self.get_knight_moves(Knight(piece.color,[row,col],""), row, col):
             possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Knight):
+            if isinstance(possible_target, Knight) and possible_target.color == enemy_color:
                 return False
 
         for move in self.get_bishop_moves(Bishop(piece.color,[row,col],""), row, col):          #Checking is King checked
             possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Bishop):
+            if isinstance(possible_target, Bishop) and possible_target.color == enemy_color:
                 return False
 
         for move in self.get_rook_moves(Rook(piece.color,[row,col],"",""), row, col):
             possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Rook):
+            if isinstance(possible_target, Rook) and possible_target.color == enemy_color:
                 return False
 
         for move in self.get_queen_moves(Queen(piece.color,[row,col],""), row, col):
             possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Queen):
+            if isinstance(possible_target, Queen) and possible_target.color == enemy_color:
                 return False
 
 
         for c, r in offsets:
-            nr, nc = col + c, row + r
+            nr, nc = row + r, col + c
             if 0 <= nr <= 7 and 0 <= nc <= 7:
-                cell_piece = self.board[nr][nc]
-                if isinstance(cell_piece, King):
+                possible_target = self.board[nr][nc]
+                if isinstance(possible_target, King) and possible_target.color == enemy_color:
+                    return False
+
+        pawn_dir = 1 if piece.color == "w" else -1
+        for dc in [-1, 1]:
+            nr, nc = row + pawn_dir, col + dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                target = self.board[nr][nc]
+                if isinstance(target, Pawn) and target.color == enemy_color:
                     return False
 
         return True
@@ -179,12 +197,12 @@ class Board:
     def get_king_moves(self,piece, row, col):
         moves = []
         offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]                               #King moves
-        for c, r in offsets:
-            nr,nc = col + c, row + r
+        for r, c in offsets:
+            nr,nc = row + r, col + c
             if 0 <= nr <= 7 and 0 <= nc <= 7:
                 cell_piece = self.board[nr][nc]
                 #checking if King won't be checked on that cell
-                if (cell_piece == None or cell_piece.color != piece.color) and self.is_king_not_checked(piece, nr, nc):
+                if (cell_piece is None or cell_piece.color != piece.color) and self.is_king_not_checked(piece, nr, nc):
                     moves.append([nr,nc])
 
         return moves
@@ -219,7 +237,15 @@ class Board:
              case piece if isinstance(piece, Queen):
                 moves = self.get_queen_moves(piece, row, col)
 
+             case piece if isinstance(piece, King):
+                 moves = self.get_king_moves(piece, row, col)
+
         return moves
+
+
+    def move_piece(self, start_sq, end_sq):
+        self.board[end_sq[0]][end_sq[1]] = self.board[start_sq[0]][start_sq[1]]
+        self.board[start_sq[0]][start_sq[1]] = None
 
 
 
