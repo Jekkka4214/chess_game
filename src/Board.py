@@ -199,28 +199,28 @@ class Board:
 
         if not piece.has_moved and self.is_king_not_checked(piece, row, col):
 
-            left_rook = self.board[row][0]
-            if isinstance(left_rook, Rook) and not left_rook.has_moved:
+            right_rook = self.board[row][7]
+            if isinstance(right_rook, Rook) and not right_rook.has_moved:
                 can_castle_long = True
-                for i in range(1, 4):
+                for i in range(4, 7):
                     if self.board[row][i] is not None:
                         can_castle_long = False
                         break
-                    if i > 1 and not self.is_king_not_checked(piece, row, i):
+                    if not self.is_king_not_checked(piece, row, i):
                         can_castle_long = False
                         break
                 if can_castle_long:
-                    moves.append([row, col - 2])
+                    moves.append([row, col + 2])
 
-        right_rook = self.board[row][7]
-        if isinstance(right_rook, Rook) and not right_rook.has_moved:
+        left_rook = self.board[row][0]
+        if isinstance(left_rook, Rook) and not left_rook.has_moved:
             can_castle_short = True
-            for i in range(5, 7):
+            for i in range(1, 3):
                 if self.board[row][i] is not None or not self.is_king_not_checked(piece, row, i):
                     can_castle_short = False
                     break
             if can_castle_short:
-                moves.append([row, col + 2])
+                moves.append([row, col - 2])
 
 
         offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]                                        #King moves
@@ -278,10 +278,12 @@ class Board:
 
         if isinstance(piece, King):
             if end_sq[1] - start_sq[1] == 2:
-                self.board[end_sq[0]][3] = self.board[end_sq[0]][0]
-                self.board[end_sq[0]][0] = None
+                self.board[end_sq[0]][4] = self.board[end_sq[0]][7]
+                self.board[end_sq[0]][7] = None
 
-            # elif start_sq[1] - end_sq[1] == 2:
+            elif start_sq[1] - end_sq[1] == 2:
+                self.board[end_sq[0]][2] = self.board[end_sq[0]][0]
+                self.board[end_sq[0]][0] = None
 
 
         self.board[end_sq[0]][end_sq[1]] = piece                                        #Moves

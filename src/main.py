@@ -53,7 +53,6 @@ def main():
     player_clicks = []
     valid_moves = []
     white_to_move = True
-    board[0][0] = None
 
     while True:
         for event in pygame.event.get():
