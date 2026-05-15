@@ -24,19 +24,25 @@ def load_images(board_obj):
                 piece.image_surface = pygame.transform.scale(img, (SQ_SIZE, SQ_SIZE))
 
 
-def draw_game_state(screen, board_obj):
-    #Drawing board
-    for r in range(DIMENSION):
-        for c in range(DIMENSION):
-            # 1.draw cell
-            color = COLORS[(r + c) % 2]
-            rect = pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE)
-            pygame.draw.rect(screen, color, rect)
 
-            # 2. draw piece
-            piece = board_obj.board[r][c]
-            if piece:
-                screen.blit(piece.image_surface, rect)
+def draw_game_state(screen, board_obj, valid_moves, dot_img):
+        dot_size = dot_img.get_width()
+        offset = (SQ_SIZE - dot_size) // 2
+        for r in range(DIMENSION):
+            for c in range(DIMENSION):
+                # Drawing cells
+                color = COLORS[(r + c) % 2]
+                rect = pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE)
+                pygame.draw.rect(screen, color, rect)
+
+                # Drawing dotts that shows possible moves
+                if [r, c] in valid_moves:
+                    screen.blit(dot_img, (c * SQ_SIZE + offset, r * SQ_SIZE + offset))
+
+                # Drawing piece
+                piece = board_obj.board[r][c]
+                if piece:
+                    screen.blit(piece.image_surface, rect)
 
 
 def main():
@@ -47,6 +53,8 @@ def main():
     # Creating obj Board
     board = Board()
     load_images(board)
+    dot_img = pygame.image.load(os.path.join(base_path, "data/Pieces_img/dott.png")).convert_alpha()
+    dot_img = pygame.transform.scale(dot_img, (SQ_SIZE * 0.35, SQ_SIZE * 0.35))
 
     clock = pygame.time.Clock()
     selected_sq = ()
@@ -107,7 +115,7 @@ def main():
                     valid_moves = board.get_valid_moves(r, c)
 
         # drawing by 1 iteration
-        draw_game_state(screen, board)
+        draw_game_state(screen, board, valid_moves, dot_img)
 
         pygame.display.flip()
         clock.tick(60)
