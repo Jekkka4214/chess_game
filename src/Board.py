@@ -219,6 +219,9 @@ class Board:
                 if self.board[row][i] is not None or not self.is_king_not_checked(piece, row, i):
                     can_castle_short = False
                     break
+                if not self.is_king_not_checked(piece, row, i):
+                    can_castle_short = False
+                    break
             if can_castle_short:
                 moves.append([row, col - 2])
 
@@ -239,35 +242,65 @@ class Board:
     def get_queen_moves(self, piece, row, col):
         return self.get_bishop_moves(piece,row,col) + self.get_rook_moves(piece,row,col)                        #Queen moves consists of moves of Bishop and Rook
 
-
-
-    def get_valid_moves(self, row, col):
+    def get_valid_moves(self, row, col, king_pos):
         piece = self.board[row][col]
-        moves = []
+        if piece is None:
+            return []
 
-        match piece:
-             case piece if isinstance(piece, Pawn) and piece.color == "w":
-                 moves = self.get_w_pawn_moves(piece, row, col)
+        if isinstance(piece, Pawn):
+            moves = self.get_w_pawn_moves(piece, row, col) if piece.color == "w" else self.get_b_pawn_moves(piece, row,
+                                                                                                            col)
+        elif isinstance(piece, Knight):
+            moves = self.get_knight_moves(piece, row, col)
+        elif isinstance(piece, Bishop):
+            moves = self.get_bishop_moves(piece, row, col)
+        elif isinstance(piece, Rook):
+            moves = self.get_rook_moves(piece, row, col)
+        elif isinstance(piece, Queen):
+            moves = self.get_queen_moves(piece, row, col)
+        elif isinstance(piece, King):
+            moves = self.get_king_moves(piece, row, col)
+        else:
+            return []
 
-             case piece if isinstance(piece, Pawn) and piece.color == "b":
-                 moves = self.get_b_pawn_moves(piece, row, col)
+        valid_moves = []
 
-             case piece if isinstance(piece, Knight):
-                 moves = self.get_knight_moves(piece, row, col)                        #Method that is called from main for getting valid moves
+        for move in moves:
+            target_row, target_col = move[0], move[1]
 
-             case piece if isinstance(piece, Bishop):
-                 moves = self.get_bishop_moves(piece, row, col)
+            saved_target_piece = self.board[target_row][target_col]
 
-             case piece if isinstance(piece, Rook):
-                 moves = self.get_rook_moves(piece, row, col)
+            self.board[target_row][target_col] = piece
+            self.board[row][col] = None
 
-             case piece if isinstance(piece, Queen):
-                moves = self.get_queen_moves(piece, row, col)
+            current_king_pos = [target_row, target_col] if isinstance(piece, King) else king_pos
 
-             case piece if isinstance(piece, King):
-                 moves = self.get_king_moves(piece, row, col)
+            king_piece = self.board[current_king_pos[0]][current_king_pos[1]]
 
-        return moves
+            if king_piece and self.is_king_not_checked(king_piece, current_king_pos[0], current_king_pos[1]):
+                valid_moves.append(move)
+
+            self.board[row][col] = piece
+            self.board[target_row][target_col] = saved_target_piece
+
+        return valid_moves
+
+    def is_checkmate(self, king_pos):
+        king_piece = self.board[king_pos[0]][king_pos[1]]
+        if king_piece is None:
+            return False
+
+        if not self.is_king_not_checked(king_piece, king_pos[0], king_pos[1]) and self.get_king_moves(
+                king_pos[0], king_pos[1], king_pos) == []:
+            for r in range(8):
+                for c in range (8):
+                    piece = self.board[r][c]
+                if piece is not None and piece.color == king_piece.color:
+                    possible_moves = self.get_valid_moves(piece, r, c)
+                    if len(possible_moves) > 0:
+                        return False
+            return True
+
 
 
     def move_piece(self, start_sq, end_sq):
@@ -277,17 +310,17 @@ class Board:
             piece.has_moved = True
 
         if isinstance(piece, King):
-            if end_sq[1] - start_sq[1] == 2:
+            if (end_sq[1] - start_sq[1] == 2) and self.is_king_not_checked(piece, start_sq[0], start_sq[1]):
                 self.board[end_sq[0]][4] = self.board[end_sq[0]][7]
                 self.board[end_sq[0]][7] = None
 
-            elif start_sq[1] - end_sq[1] == 2:
+            elif start_sq[1] - end_sq[1] == 2 and self.is_king_not_checked(piece, start_sq[0], start_sq[1]):
                 self.board[end_sq[0]][2] = self.board[end_sq[0]][0]
                 self.board[end_sq[0]][0] = None
 
-
         self.board[end_sq[0]][end_sq[1]] = piece                                        #Moves
         self.board[start_sq[0]][start_sq[1]] = None
+        piece.position = [end_sq[0], end_sq[1]]
 
 
 

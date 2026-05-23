@@ -3,7 +3,7 @@ import sys
 from src.Board import Board
 import os
 
-
+from src.Piece import King
 
 # constance for working with pixels
 base_path = os.path.dirname(os.path.dirname(__file__))
@@ -45,6 +45,29 @@ def draw_game_state(screen, board_obj, valid_moves, dot_img):
                     screen.blit(piece.image_surface, rect)
 
 
+def draw_winner_window(screen, text):
+    window_width, window_height = 400, 150
+    screen_width, screen_height = screen.get_size()
+
+    x = (screen_width - window_width) // 2
+    y = (screen_height - window_height) // 2
+
+
+    overlay = pygame.Surface((window_width, window_height), pygame.SRCALPHA)
+    pygame.draw.rect(overlay, (40, 40, 40, 230), (0, 0, window_width, window_height), border_radius=15)
+    pygame.draw.rect(overlay, (212, 175, 55), (0, 0, window_width, window_height), width=3, border_radius=15)
+
+    font = pygame.font.SysFont("Arial", 36, bold=True)
+
+    text_surface = font.render(text, True, (255, 255, 255))
+    text_rect = text_surface.get_rect()
+    text_rect.center = (window_width // 2, window_height // 2)
+
+    overlay.blit(text_surface, text_rect)
+
+    screen.blit(overlay, (x, y))
+
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -57,16 +80,20 @@ def main():
     dot_img = pygame.transform.scale(dot_img, (SQ_SIZE * 0.35, SQ_SIZE * 0.35))
 
     clock = pygame.time.Clock()
+    w_king_pos = [0, 4]
+    b_king_pos = [7, 4]
     selected_sq = ()
     player_clicks = []
     valid_moves = []
     white_to_move = True
+
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
@@ -92,12 +119,20 @@ def main():
                     start_sq = player_clicks[0]
                     end_sq = player_clicks[1]
 
+
                     if [end_sq[0], end_sq[1]] in valid_moves:
                         board.move_piece(start_sq, end_sq)
+                        board[end_sq[0]][end_sq[1]].position = [end_sq[0], end_sq[1]]
                         white_to_move = not white_to_move
                         selected_sq = ()
                         player_clicks = []
                         valid_moves = []
+                        if white_to_move and board.is_checkmate(b_king_pos):
+                            draw_winner_window(screen, "Black Wins")
+
+                        elif not white_to_move and board.is_checkmate(w_king_pos):
+                            draw_winner_window(screen, "White Wins")
+
 
                     else:
                         piece = board.board[row][col]
@@ -110,9 +145,30 @@ def main():
                             player_clicks = []
                         valid_moves = []
 
+                        # --- ВСЯ ФУНКЦИЯ НАХОДИТСЯ ВНУТРИ СЛУШАТЕЛЯ НАЖАТИЯ МЫШКИ ---
+
+                for r in range(DIMENSION):
+                    for c in range(DIMENSION):
+                        p = board[r][c]
+                        if p and isinstance(p, King):
+                            if p.color == "w":
+                                w_king_pos = [r, c]
+                            else:
+                                b_king_pos = [r, c]
+
                 if len(player_clicks) == 1:
-                    r, c = player_clicks[0]
-                    valid_moves = board.get_valid_moves(r, c)
+                     r, c = player_clicks[0]
+                     if white_to_move:
+                         valid_moves = board.get_valid_moves(r, c, w_king_pos)
+                     else:
+                         valid_moves = board.get_valid_moves(r, c, b_king_pos)
+
+
+
+
+
+
+
 
         # drawing by 1 iteration
         draw_game_state(screen, board, valid_moves, dot_img)
