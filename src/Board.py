@@ -150,45 +150,58 @@ class Board:
 
 
 
-    def is_king_not_checked(self,piece, row, col):
-
+    def is_king_not_checked(self, piece, row, col):
         enemy_color = "b" if piece.color == "w" else "w"
-        offsets = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
 
-        for move in self.get_knight_moves(Knight(piece.color,[row,col],""), row, col):
-            possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Knight) and possible_target.color == enemy_color:
-                return False
+        cardinal_directions = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+        for dr, dc in cardinal_directions:
+            for i in range(1, 8):
+                nr, nc = row + dr * i, col + dc * i
+                if 0 <= nr < 8 and 0 <= nc < 8:
+                    target = self.board[nr][nc]
+                    if target is not None:
+                        if target.color == enemy_color and isinstance(target, (Rook, Queen)):
+                            return False
+                        break
+                else:
+                    break
 
-        for move in self.get_bishop_moves(Bishop(piece.color,[row,col],""), row, col):             #Checking is King checked
-            possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Bishop) and possible_target.color == enemy_color:
-                return False
+        diagonal_directions = [(1, 1), (-1, -1), (1, -1), (-1, 1)]
+        for dr, dc in diagonal_directions:
+            for i in range(1, 8):
+                nr, nc = row + dr * i, col + dc * i
+                if 0 <= nr < 8 and 0 <= nc < 8:
+                    target = self.board[nr][nc]
+                    if target is not None:
+                        if target.color == enemy_color and isinstance(target, (Bishop, Queen)):
+                            return False
+                        break
+                else:
+                    break
 
-        for move in self.get_rook_moves(Rook(piece.color,[row,col],"",""), row, col):
-            possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Rook) and possible_target.color == enemy_color:
-                return False
-
-        for move in self.get_queen_moves(Queen(piece.color,[row,col],""), row, col):
-            possible_target = self.board[move[0]][move[1]]
-            if isinstance(possible_target, Queen) and possible_target.color == enemy_color:
-                return False
-
-
-        for c, r in offsets:
-            nr, nc = row + r, col + c
-            if 0 <= nr <= 7 and 0 <= nc <= 7:
-                possible_target = self.board[nr][nc]
-                if isinstance(possible_target, King) and possible_target.color == enemy_color:
+        knight_offsets = [(2, 1), (1, 2), (1, -2), (-2, 1), (-1, 2), (2, -1), (-1, -2), (-2, -1)]
+        for dr, dc in knight_offsets:
+            nr, nc = row + dr, col + dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                target = self.board[nr][nc]
+                if target is not None and target.color == enemy_color and isinstance(target, Knight):
                     return False
+
 
         pawn_dir = 1 if piece.color == "w" else -1
         for dc in [-1, 1]:
             nr, nc = row + pawn_dir, col + dc
             if 0 <= nr < 8 and 0 <= nc < 8:
                 target = self.board[nr][nc]
-                if isinstance(target, Pawn) and target.color == enemy_color:
+                if target is not None and target.color == enemy_color and isinstance(target, Pawn):
+                    return False
+
+        king_offsets = [(1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (-1, 1), (1, -1), (-1, -1)]
+        for dr, dc in king_offsets:
+            nr, nc = row + dr, col + dc
+            if 0 <= nr < 8 and 0 <= nc < 8:
+                target = self.board[nr][nc]
+                if target is not None and target.color == enemy_color and isinstance(target, King):
                     return False
 
         return True
@@ -212,18 +225,18 @@ class Board:
                 if can_castle_long:
                     moves.append([row, col + 2])
 
-        left_rook = self.board[row][0]
-        if isinstance(left_rook, Rook) and not left_rook.has_moved:
-            can_castle_short = True
-            for i in range(1, 3):
-                if self.board[row][i] is not None or not self.is_king_not_checked(piece, row, i):
-                    can_castle_short = False
-                    break
-                if not self.is_king_not_checked(piece, row, i):
-                    can_castle_short = False
-                    break
-            if can_castle_short:
-                moves.append([row, col - 2])
+            left_rook = self.board[row][0]
+            if isinstance(left_rook, Rook) and not left_rook.has_moved:
+                can_castle_short = True
+                for i in range(1, 3):
+                    if self.board[row][i] is not None or not self.is_king_not_checked(piece, row, i):
+                        can_castle_short = False
+                        break
+                    if not self.is_king_not_checked(piece, row, i):
+                        can_castle_short = False
+                        break
+                if can_castle_short:
+                    moves.append([row, col - 2])
 
 
         offsets = [(1,0),(0,1),(-1,0),(0,-1),(1,1),(-1,1),(1,-1),(-1,-1)]                                        #King moves
@@ -290,16 +303,19 @@ class Board:
         if king_piece is None:
             return False
 
-        if not self.is_king_not_checked(king_piece, king_pos[0], king_pos[1]) and self.get_king_moves(
-                king_pos[0], king_pos[1], king_pos) == []:
-            for r in range(8):
-                for c in range (8):
-                    piece = self.board[r][c]
-                if piece is not None and piece.color == king_piece.color:
-                    possible_moves = self.get_valid_moves(piece, r, c)
-                    if len(possible_moves) > 0:
-                        return False
-            return True
+        if not self.is_king_not_checked(king_piece, king_pos[0], king_pos[1]):
+            if len(self.get_valid_moves(king_pos[0], king_pos[1], king_pos)) == 0:
+
+                for r in range(8):
+                    for c in range(8):
+                        piece = self.board[r][c]
+                        if piece is not None and piece.color == king_piece.color:
+                            possible_moves = self.get_valid_moves(r, c, king_pos)
+                            if len(possible_moves) > 0:
+                                return False
+
+                return True
+        return False
 
 
 
