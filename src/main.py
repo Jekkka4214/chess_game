@@ -138,11 +138,21 @@ def main():
                             if white_to_move:
                                 if board.is_checkmate(b_king_pos):
                                     game_over = True
-                                    winner_text = "White Wins"
+                                    winner_text = "White Wins!"
                             else:
                                 if board.is_checkmate(w_king_pos):
                                     game_over = True
-                                    winner_text = "Black Wins"
+                                    winner_text = "Black Wins!"
+
+                            if white_to_move:
+                                if board.is_stalemate(b_king_pos):
+                                    game_over = True
+                                    winner_text = "Stalemate"
+                            else:
+                                if board.is_stalemate(w_king_pos):
+                                    game_over = True
+                                    winner_text = "Stalemate"
+
 
                             white_to_move = not white_to_move
                             selected_sq = ()

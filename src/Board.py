@@ -315,7 +315,28 @@ class Board:
                                 return False
 
                 return True
+
         return False
+
+    def is_stalemate(self, king_pos):
+        king_piece = self.board[king_pos[0]][king_pos[1]]
+        if king_piece is None:
+            return False
+        if self.is_king_not_checked(king_piece, king_pos[0], king_pos[1]):
+            if len(self.get_valid_moves(king_pos[0], king_pos[1], king_pos)) == 0:
+
+                for r in range(8):
+                    for c in range(8):
+                        piece = self.board[r][c]
+                        if piece is not None and piece.color == king_piece.color:
+                            possible_moves = self.get_valid_moves(r, c, king_pos)
+                            if len(possible_moves) > 0:
+                                return False
+
+                return True
+
+        return False
+
 
 
 
