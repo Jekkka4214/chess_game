@@ -1,8 +1,9 @@
+from tabnanny import check
+
 import pygame
 import sys
 from src.Board import Board
 import os
-
 from src.Piece import King
 
 # constance for working with pixels
@@ -18,7 +19,6 @@ def load_images(board_obj):
         for c in range(DIMENSION):
             piece = board_obj.board[r][c]
             if piece:
-                # Склеиваем путь правильно
                 full_path = os.path.join(base_path, piece.icon)
                 img = pygame.image.load(full_path).convert_alpha()
                 piece.image_surface = pygame.transform.scale(img, (SQ_SIZE, SQ_SIZE))
@@ -35,7 +35,7 @@ def draw_game_state(screen, board_obj, valid_moves, dot_img):
                 rect = pygame.Rect(c * SQ_SIZE, r * SQ_SIZE, SQ_SIZE, SQ_SIZE)
                 pygame.draw.rect(screen, color, rect)
 
-                # Drawing dotts that shows possible moves
+                # Drawing dots that shows possible moves
                 if [r, c] in valid_moves:
                     screen.blit(dot_img, (c * SQ_SIZE + offset, r * SQ_SIZE + offset))
 
@@ -70,8 +70,22 @@ def draw_winner_window(screen, text):
 
 def main():
     pygame.init()
+    pygame.mixer.init()
+
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("Chess Game")
+
+    move_sound = pygame.mixer.Sound(os.path.join(base_path, "data/Sound/move.mp3"))
+    capture_sound = pygame.mixer.Sound(os.path.join(base_path, "data/Sound/capture.mp3"))
+    game_end_sound = pygame.mixer.Sound(os.path.join(base_path, "data/Sound/game_end.mp3"))
+    castle_sound = pygame.mixer.Sound(os.path.join(base_path, "data/Sound/castle.mp3"))
+    check_sound = pygame.mixer.Sound(os.path.join(base_path, "data/Sound/check.mp3"))
+
+    move_sound.set_volume(1)
+    capture_sound.set_volume(1)
+    game_end_sound.set_volume(1)
+    castle_sound.set_volume(1)
+    check_sound.set_volume(1)
 
     # Creating obj Board
     board = Board()
@@ -123,7 +137,14 @@ def main():
                         end_sq = player_clicks[1]
 
                         if [end_sq[0], end_sq[1]] in valid_moves:
+                            is_capture = board[end_sq[0]][end_sq[1]] is not None
                             board.move_piece(start_sq, end_sq)
+                            if is_capture:
+                                capture_sound.play()
+                            elif isinstance(board[end_sq[0]][end_sq[1]], King) and ((end_sq[1] - start_sq[1] == 2) or end_sq[1] - start_sq[1] == -2):
+                                castle_sound.play()
+                            else:
+                                move_sound.play()
                             board[end_sq[0]][end_sq[1]].position = [end_sq[0], end_sq[1]]
 
                             for r in range(DIMENSION):
@@ -139,19 +160,26 @@ def main():
                                 if board.is_checkmate(b_king_pos):
                                     game_over = True
                                     winner_text = "White Wins!"
+                                    check_sound.play()
+                                    game_end_sound.play()
+
                             else:
                                 if board.is_checkmate(w_king_pos):
                                     game_over = True
                                     winner_text = "Black Wins!"
+                                    check_sound.play()
+                                    game_end_sound.play()
 
                             if white_to_move:
                                 if board.is_stalemate(b_king_pos):
                                     game_over = True
                                     winner_text = "Stalemate"
+                                    game_end_sound.play()
                             else:
                                 if board.is_stalemate(w_king_pos):
                                     game_over = True
                                     winner_text = "Stalemate"
+                                    game_end_sound.play()
 
 
                             white_to_move = not white_to_move

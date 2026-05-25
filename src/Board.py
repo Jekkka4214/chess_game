@@ -347,7 +347,7 @@ class Board:
             piece.has_moved = True
 
         if isinstance(piece, King):
-            if (end_sq[1] - start_sq[1] == 2) and self.is_king_not_checked(piece, start_sq[0], start_sq[1]):
+            if end_sq[1] - start_sq[1] == 2 and self.is_king_not_checked(piece, start_sq[0], start_sq[1]):
                 self.board[end_sq[0]][4] = self.board[end_sq[0]][7]
                 self.board[end_sq[0]][7] = None
 
