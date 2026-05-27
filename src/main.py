@@ -1,9 +1,10 @@
-from tabnanny import check
-
 import pygame
 import sys
-from src.Board import Board
+from functools import wraps
 import os
+
+from src import ChessException
+from src.Board import Board
 from src.Piece import King
 
 # constance for working with pixels
@@ -13,6 +14,13 @@ DIMENSION = 8
 SQ_SIZE = WIDTH // DIMENSION
 COLORS = [(240, 217, 181), (181, 136, 99)]
 
+
+def log_move(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        return result
+    return wrapper
 
 def load_images(board_obj):
     for r in range(DIMENSION):
@@ -67,6 +75,11 @@ def draw_winner_window(screen, text):
 
     screen.blit(overlay, (x, y))
 
+def save_move_to_log(message):
+    log_path = os.path.join(base_path, "game_log.txt")
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
+
 
 def main():
     pygame.init()
@@ -103,12 +116,40 @@ def main():
     game_over = False
     winner_text = ""
 
+    if os.path.exists(os.path.join(base_path, "game_log.txt")):
+        os.remove(os.path.join(base_path, "game_log.txt"))
 
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_s:
+                    try:
+                        board.save_game_to_json(white_to_move, "savegame.json")
+                        save_move_to_log("--- Game was saved ---")
+                    except ChessException as e:
+                        print(e)
+
+                elif event.key == pygame.K_l:
+                    try:
+                        white_to_move = board.load_game_from_json("savegame.json")
+                        load_images(board)
+                        save_move_to_log("--- Game was loaded ---")
+
+                        for piece, r, c in board.all_pieces():
+                            if isinstance(piece, King):
+                                if piece.color == "w":
+                                    w_king_pos = [r, c]
+                                else:
+                                    b_king_pos = [r, c]
+
+                        selected_sq = ()
+                        player_clicks = []
+                        valid_moves = []
+                    except ChessException as e:
+                        print(e)
 
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -137,7 +178,12 @@ def main():
                         end_sq = player_clicks[1]
 
                         if [end_sq[0], end_sq[1]] in valid_moves:
+                            moving_piece = board[start_sq[0]][start_sq[1]]
                             is_capture = board[end_sq[0]][end_sq[1]] is not None
+
+                            log_msg = f"{moving_piece.color.upper()}: {start_sq} -> {end_sq}"
+                            save_move_to_log(log_msg)
+
                             board.move_piece(start_sq, end_sq)
                             if is_capture:
                                 capture_sound.play()
@@ -147,14 +193,12 @@ def main():
                                 move_sound.play()
                             board[end_sq[0]][end_sq[1]].position = [end_sq[0], end_sq[1]]
 
-                            for r in range(DIMENSION):
-                                for c in range(DIMENSION):
-                                    p = board[r][c]
-                                    if p and isinstance(p, King):
-                                        if p.color == "w":
-                                            w_king_pos = [r, c]
-                                        else:
-                                            b_king_pos = [r, c]
+                            for p, r, c in board.all_pieces():
+                                if isinstance(p, King):
+                                    if p.color == "w":
+                                        w_king_pos = [r, c]
+                                    else:
+                                        b_king_pos = [r, c]
 
                             if white_to_move:
                                 if board.is_checkmate(b_king_pos):

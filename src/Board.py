@@ -1,9 +1,14 @@
+import json
+import re
+
+from src.ChessException import ChessException
 from src.Piece import *
 
 class Board:
 
     def __init__(self):
         self.board = [[None for _ in range(8)] for _ in range(8)]
+        self.move_history = []
         for i in range (0,8):                                                                               #Creating new board with pieces
             self.board[1][i] = Pawn("w", [1,i], "data/Pieces_img/w_Pawn.png")
             self.board[6][i] = Pawn("b", [6, i], "data/Pieces_img/b_Pawn.png")
@@ -30,6 +35,64 @@ class Board:
 
     def __getitem__(self, item):
         return self.board[item]
+
+    def all_pieces(self):
+        for r in range(8):
+            for c in range(8):
+                piece = self.board[r][c]
+                if piece is not None:
+                    yield piece, r, c
+
+    def get_squares_of_color(self, color):
+        check_color = lambda p: p.color == color
+
+        return {(r, c) for p, r, c in self.all_pieces() if check_color(p)}
+
+    def save_game_to_json(self, white_to_move, filename="savegame.json"):
+        if not re.match(r"^[a-zA-Z0-9_\-]+\.json$", filename):
+            raise ChessException("Invalid file name")
+
+        pieces_data = []
+        for piece, r, c in self.all_pieces():
+            pieces_data.append({
+                "type": piece.__class__.__name__,
+                "color": piece.color,
+                "position": [r, c],
+                "icon": piece.icon,
+                "has_moved": getattr(piece, "has_moved", False)
+            })
+
+        game_state = {
+            "white_to_move": white_to_move,
+            "pieces": pieces_data
+        }
+
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(game_state, f, indent=4)
+
+    def load_game_from_json(self, filename="savegame.json"):
+        try:
+            with open(filename, "r", encoding="utf-8") as f:
+                game_state = json.load(f)
+
+            self.board = [[None for _ in range(8)] for _ in range(8)]
+            classes_map = {cls.__name__: cls for cls in [Pawn, Knight, Bishop, Rook, Queen, King]}
+
+            for p_data in game_state["pieces"]:
+                cls = classes_map[p_data["type"]]
+                r, c = p_data["position"]
+                if cls in (Rook, King):
+                    self.board[r][c] = cls(p_data["color"], [r, c], p_data["icon"], p_data["has_moved"])
+                else:
+                    self.board[r][c] = cls(p_data["color"], [r, c], p_data["icon"])
+
+            return game_state["white_to_move"]
+
+        except FileNotFoundError:
+            print(f"Warning: File {filename} not found.")
+            return True
+        except Exception as e:
+            raise ChessException(f"Cannot load safe: {e}")
 
 
 
