@@ -3,9 +3,10 @@ import sys
 from functools import wraps
 import os
 
-from src import ChessException
+from src import ChessException, JSON
 from src.Board import Board
 from src.Piece import King
+from src.JSON import *
 
 # constance for working with pixels
 base_path = os.path.dirname(os.path.dirname(__file__))
@@ -127,14 +128,15 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_s:
                     try:
-                        board.save_game_to_json(white_to_move, "savegame.json")
+                        SaveManager.save_game_to_json(board, white_to_move, "savegame.json")
                         save_move_to_log("--- Game was saved ---")
                     except ChessException as e:
                         print(e)
 
                 elif event.key == pygame.K_l:
                     try:
-                        white_to_move = board.load_game_from_json("savegame.json")
+                        white_to_move = SaveManager.load_game_from_json(board, "savegame.json")
+
                         load_images(board)
                         save_move_to_log("--- Game was loaded ---")
 
