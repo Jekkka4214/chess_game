@@ -1,0 +1,315 @@
+{
+    "white_to_move": true,
+    "pieces": [
+        {
+            "type": "Rook",
+            "color": "w",
+            "position": [
+                0,
+                0
+            ],
+            "icon": "data/Pieces_img/w_Rook.png",
+            "has_moved": false
+        },
+        {
+            "type": "Bishop",
+            "color": "w",
+            "position": [
+                0,
+                2
+            ],
+            "icon": "data/Pieces_img/w_Bishop.png",
+            "has_moved": false
+        },
+        {
+            "type": "King",
+            "color": "w",
+            "position": [
+                0,
+                3
+            ],
+            "icon": "data/Pieces_img/w_King.png",
+            "has_moved": false
+        },
+        {
+            "type": "Queen",
+            "color": "w",
+            "position": [
+                0,
+                4
+            ],
+            "icon": "data/Pieces_img/w_Queen.png",
+            "has_moved": false
+        },
+        {
+            "type": "Bishop",
+            "color": "w",
+            "position": [
+                0,
+                5
+            ],
+            "icon": "data/Pieces_img/w_Bishop.png",
+            "has_moved": false
+        },
+        {
+            "type": "Knight",
+            "color": "w",
+            "position": [
+                0,
+                6
+            ],
+            "icon": "data/Pieces_img/w_Knight.png",
+            "has_moved": false
+        },
+        {
+            "type": "Rook",
+            "color": "w",
+            "position": [
+                0,
+                7
+            ],
+            "icon": "data/Pieces_img/w_Rook.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                0
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                1
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                2
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                5
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                6
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                1,
+                7
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Knight",
+            "color": "w",
+            "position": [
+                2,
+                2
+            ],
+            "icon": "data/Pieces_img/w_Knight.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                3,
+                3
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "w",
+            "position": [
+                3,
+                4
+            ],
+            "icon": "data/Pieces_img/w_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                4,
+                3
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                0
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                1
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                2
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                5
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                6
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Pawn",
+            "color": "b",
+            "position": [
+                6,
+                7
+            ],
+            "icon": "data/Pieces_img/b_Pawn.png",
+            "has_moved": false
+        },
+        {
+            "type": "Rook",
+            "color": "b",
+            "position": [
+                7,
+                0
+            ],
+            "icon": "data/Pieces_img/b_Rook.png",
+            "has_moved": false
+        },
+        {
+            "type": "Knight",
+            "color": "b",
+            "position": [
+                7,
+                1
+            ],
+            "icon": "data/Pieces_img/b_Knight.png",
+            "has_moved": false
+        },
+        {
+            "type": "Bishop",
+            "color": "b",
+            "position": [
+                7,
+                2
+            ],
+            "icon": "data/Pieces_img/b_Bishop.png",
+            "has_moved": false
+        },
+        {
+            "type": "King",
+            "color": "b",
+            "position": [
+                7,
+                3
+            ],
+            "icon": "data/Pieces_img/b_King.png",
+            "has_moved": false
+        },
+        {
+            "type": "Queen",
+            "color": "b",
+            "position": [
+                7,
+                4
+            ],
+            "icon": "data/Pieces_img/b_Queen.png",
+            "has_moved": false
+        },
+        {
+            "type": "Bishop",
+            "color": "b",
+            "position": [
+                7,
+                5
+            ],
+            "icon": "data/Pieces_img/b_Bishop.png",
+            "has_moved": false
+        },
+        {
+            "type": "Knight",
+            "color": "b",
+            "position": [
+                7,
+                6
+            ],
+            "icon": "data/Pieces_img/b_Knight.png",
+            "has_moved": false
+        },
+        {
+            "type": "Rook",
+            "color": "b",
+            "position": [
+                7,
+                7
+            ],
+            "icon": "data/Pieces_img/b_Rook.png",
+            "has_moved": false
+        }
+    ]
+}
